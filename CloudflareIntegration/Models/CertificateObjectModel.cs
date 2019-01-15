@@ -1,9 +1,9 @@
 ﻿namespace CloudflareIntegration.Models
 {
-    public class CertificatePackObjectModel
+    public class CertificateObjectModel
     {
-        public string type { get; set; }
-
         public string[] hosts { get; set; }
+
+        //public string type { get; set; }
     }
 }

@@ -7,7 +7,7 @@ namespace CloudflareIntegration.Models
     {
         public App app { get; set; }
 
-        public DateTime current_period_end { get; set; }
+        public DateTime? current_period_end { get; set; }
 
         public IEnumerable<ComponentValue> component_values { get; set; }
 
@@ -15,7 +15,7 @@ namespace CloudflareIntegration.Models
 
         public decimal price { get; set; }
 
-        public DateTime current_period_start { get; set; }
+        public DateTime? current_period_start { get; set; }
 
         public Zone zone { get; set; }
 

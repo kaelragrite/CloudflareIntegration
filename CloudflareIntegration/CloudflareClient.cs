@@ -7,62 +7,25 @@ using System.Text;
 
 namespace CloudflareIntegration
 {
-    public class CloudflareIntegrator
+    public class CloudflareClient
     {
         private readonly HttpClient _client = new HttpClient();
 
         private readonly string _email = "kote.kargareteli@gmail.com";
         private readonly string _apiKey = "0cd2b200ce8b196f970d36229798fefeb274f";
 
-        public async void AccountDetails()
-        {
-            _client.DefaultRequestHeaders.Add("X-Auth-Email", _email);
-            _client.DefaultRequestHeaders.Add("X-Auth-Key", _apiKey);
-
-            var response = await _client.GetAsync("https://api.cloudflare.com/client/v4/accounts/a1674829d9aacba53c9a317a6f19d225");
-
-            var content = await response.Content.ReadAsStringAsync();
-
-            Console.WriteLine(response.IsSuccessStatusCode);
-            Console.WriteLine(content);
-        }
-
-        public async void ZonesList()
-        {
-            _client.DefaultRequestHeaders.Add("X-Auth-Email", _email);
-            _client.DefaultRequestHeaders.Add("X-Auth-Key", _apiKey);
-
-            var response = await _client.GetAsync("https://api.cloudflare.com/client/v4/zones?name=sportingbit.com&status=active&page=1&per_page=20&order=status&direction=desc&match=all");
-
-            var content = await response.Content.ReadAsStringAsync();
-
-            Console.WriteLine(response.IsSuccessStatusCode);
-            Console.WriteLine(content);
-        }
-
-        public async void ZoneDetails()
-        {
-            _client.DefaultRequestHeaders.Add("X-Auth-Email", _email);
-            _client.DefaultRequestHeaders.Add("X-Auth-Key", _apiKey);
-
-            var response = await _client.GetAsync("https://api.cloudflare.com/client/v4/zones/a957cc9ce77392174f61eaf3e9fe5f4c");
-
-            var content = await response.Content.ReadAsStringAsync();
-
-            Console.WriteLine(response.IsSuccessStatusCode);
-            Console.WriteLine(content);
-        }
+        #region Zone
 
         public async void CreateZone()
         {
             _client.DefaultRequestHeaders.Add("X-Auth-Email", _email);
             _client.DefaultRequestHeaders.Add("X-Auth-Key", _apiKey);
 
-            var requestModel = new AddZoneRequestModel
+            var requestModel = new ZoneObjectModel
             {
-                name = "sportingbit.com",
+                name = "guzelbet.com",
                 jump_start = true,
-                account = new AddZoneRequestModel.Account
+                account = new ZoneObjectModel.Account
                 {
                     id = "a1674829d9aacba53c9a317a6f19d225",
                     name = "Kote.kargareteli@gmail.com's Account"
@@ -80,6 +43,19 @@ namespace CloudflareIntegration
             Console.WriteLine(responseContent);
         }
 
+        public async void ZoneDetails()
+        {
+            _client.DefaultRequestHeaders.Add("X-Auth-Email", _email);
+            _client.DefaultRequestHeaders.Add("X-Auth-Key", _apiKey);
+
+            var response = await _client.GetAsync("https://api.cloudflare.com/client/v4/zones/a957cc9ce77392174f61eaf3e9fe5f4c");
+
+            var content = await response.Content.ReadAsStringAsync();
+
+            Console.WriteLine(response.IsSuccessStatusCode);
+            Console.WriteLine(content);
+        }
+
         public async void DeleteZone()
         {
             _client.DefaultRequestHeaders.Add("X-Auth-Email", _email);
@@ -92,31 +68,55 @@ namespace CloudflareIntegration
             Console.WriteLine(responseContent);
         }
 
-        public async void AlwaysUseHttps()
+        #endregion
+
+        #region DNS
+
+        public async void DNSRecordsList()
         {
             _client.DefaultRequestHeaders.Add("X-Auth-Email", _email);
             _client.DefaultRequestHeaders.Add("X-Auth-Key", _apiKey);
 
-            var requestContent = new StringContent("{\"value\": \"on\"}", Encoding.UTF8, "application/json");
-            var response = await _client.PatchAsync("https://api.cloudflare.com/client/v4/zones/a957cc9ce77392174f61eaf3e9fe5f4c/settings/always_use_https", requestContent);
-
+            var response = await _client.GetAsync("https://api.cloudflare.com/client/v4/zones/a957cc9ce77392174f61eaf3e9fe5f4c/dns_records");
             var responseContent = await response.Content.ReadAsStringAsync();
 
             Console.WriteLine(responseContent);
         }
 
-        public async void FlexibleSSL()
+        public async void CreateDNSRecord()
         {
             _client.DefaultRequestHeaders.Add("X-Auth-Email", _email);
             _client.DefaultRequestHeaders.Add("X-Auth-Key", _apiKey);
 
-            var requestContent = new StringContent("{\"value\": \"flexible\"}", Encoding.UTF8, "application/json");
-            var response = await _client.PatchAsync("https://api.cloudflare.com/client/v4/zones/a957cc9ce77392174f61eaf3e9fe5f4c/settings/ssl", requestContent);
+            var dnsRecord = new DNSRecrodObjectModel
+            {
+                type = "A",
+                name = "sportingbit.com",
+                content = "127.0.0.3",
+                proxied = true
+            };
 
+            var serializedRecord = JsonConvert.SerializeObject(dnsRecord);
+            var requestContent = new StringContent(serializedRecord, Encoding.UTF8, "application/json");
+
+            var response = await _client.PostAsync("https://api.cloudflare.com/client/v4/zones/a957cc9ce77392174f61eaf3e9fe5f4c/dns_records", requestContent);
             var responseContent = await response.Content.ReadAsStringAsync();
 
             Console.WriteLine(responseContent);
         }
+
+        public async void DeleteDNSRecord()
+        {
+            _client.DefaultRequestHeaders.Add("X-Auth-Email", _email);
+            _client.DefaultRequestHeaders.Add("X-Auth-Key", _apiKey);
+
+            var response = await _client.DeleteAsync("https://api.cloudflare.com/client/v4/zones/a957cc9ce77392174f61eaf3e9fe5f4c/dns_records/557827629bca1e8a2ccfc490d4c60436");
+            var responseContent = await response.Content.ReadAsStringAsync();
+
+            Console.WriteLine(responseContent);
+        }
+
+        #endregion
 
         public async void ListSubscription()
         {
@@ -173,14 +173,27 @@ namespace CloudflareIntegration
             Console.WriteLine(responseContent);
         }
 
-        public async void OrderCertificatePack()
+        public async void FlexibleSSL()
         {
             _client.DefaultRequestHeaders.Add("X-Auth-Email", _email);
             _client.DefaultRequestHeaders.Add("X-Auth-Key", _apiKey);
 
-            var certificatePackModel = new CertificatePackObjectModel
+            var requestContent = new StringContent("{\"value\": \"flexible\"}", Encoding.UTF8, "application/json");
+            var response = await _client.PatchAsync("https://api.cloudflare.com/client/v4/zones/a957cc9ce77392174f61eaf3e9fe5f4c/settings/ssl", requestContent);
+
+            var responseContent = await response.Content.ReadAsStringAsync();
+
+            Console.WriteLine(responseContent);
+        }
+
+        public async void OrderCertificate()
+        {
+            _client.DefaultRequestHeaders.Add("X-Auth-Email", _email);
+            _client.DefaultRequestHeaders.Add("X-Auth-Key", _apiKey);
+
+            var certificatePackModel = new CertificateObjectModel
             {
-                hosts = new[] { "www.sportingbit.com", "sport.sportingbit.com" }
+                hosts = new[] { "sportingbit.com" }
             };
 
             var requestJson = JsonConvert.SerializeObject(certificatePackModel);
@@ -190,6 +203,19 @@ namespace CloudflareIntegration
             var responseContent = await response.Content.ReadAsStringAsync();
 
             Console.WriteLine(response.IsSuccessStatusCode);
+            Console.WriteLine(responseContent);
+        }
+
+        public async void AlwaysUseHttps()
+        {
+            _client.DefaultRequestHeaders.Add("X-Auth-Email", _email);
+            _client.DefaultRequestHeaders.Add("X-Auth-Key", _apiKey);
+
+            var requestContent = new StringContent("{\"value\": \"on\"}", Encoding.UTF8, "application/json");
+            var response = await _client.PatchAsync("https://api.cloudflare.com/client/v4/zones/a957cc9ce77392174f61eaf3e9fe5f4c/settings/always_use_https", requestContent);
+
+            var responseContent = await response.Content.ReadAsStringAsync();
+
             Console.WriteLine(responseContent);
         }
     }

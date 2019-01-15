@@ -6,9 +6,9 @@ namespace CloudflareIntegration
     {
         public static void Main(string[] args)
         {
-            var cloudflareIntegrator = new CloudflareIntegrator();
+            var client = new CloudflareClient();
 
-            cloudflareIntegrator.CreateSubscription();
+            client.OrderCertificate();
 
             Console.ReadKey();
         }
