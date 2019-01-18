@@ -8,7 +8,7 @@ namespace CloudflareIntegration
         {
             var client = new CloudflareClient();
 
-            client.OrderCertificate();
+            client.DeleteDNSRecord();
 
             Console.ReadKey();
         }

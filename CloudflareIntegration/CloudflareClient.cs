@@ -1,9 +1,11 @@
 ﻿using CloudflareIntegration.Models;
+using CloudflareIntegration.Models.Responses;
 using Newtonsoft.Json;
 using System;
 using System.Linq;
 using System.Net.Http;
 using System.Text;
+using System.Threading.Tasks;
 
 namespace CloudflareIntegration
 {
@@ -11,109 +13,106 @@ namespace CloudflareIntegration
     {
         private readonly HttpClient _client = new HttpClient();
 
-        private readonly string _email = "kote.kargareteli@gmail.com";
-        private readonly string _apiKey = "0cd2b200ce8b196f970d36229798fefeb274f";
+        private readonly string _email;
+        private readonly string _apiKey;
 
-        #region Zone
-
-        public async void CreateZone()
+        //გადაწყობისას კონფიგურაციიდან წაკითხვა ან პარამეტრებად გადმოცემა
+        public CloudflareClient()
         {
-            _client.DefaultRequestHeaders.Add("X-Auth-Email", _email);
-            _client.DefaultRequestHeaders.Add("X-Auth-Key", _apiKey);
+            _email = "kote.kargareteli@gmail.com";
+            _apiKey = "0cd2b200ce8b196f970d36229798fefeb274f";
+        }
 
-            var requestModel = new ZoneObjectModel
+        public async Task<ZoneOperationResponse> CreateZone(ZoneObjectModel zone)
+        {
+            try
             {
-                name = "guzelbet.com",
-                jump_start = true,
-                account = new ZoneObjectModel.Account
+                using (var client = new HttpClient())
                 {
-                    id = "a1674829d9aacba53c9a317a6f19d225",
-                    name = "Kote.kargareteli@gmail.com's Account"
+                    client.DefaultRequestHeaders.Add("X-Auth-Email", _email);
+                    client.DefaultRequestHeaders.Add("X-Auth-Key", _apiKey);
+
+                    var requestJson = JsonConvert.SerializeObject(zone);
+                    var requestContent = new StringContent(requestJson, Encoding.UTF8, "application/json");
+
+                    var response = await client.PostAsync("https://api.cloudflare.com/client/v4/zones", requestContent);
+                    var responseContent = await response.Content.ReadAsStringAsync();
+
+                    return JsonConvert.DeserializeObject<ZoneOperationResponse>(responseContent);
                 }
-            };
-
-            var requestJson = JsonConvert.SerializeObject(requestModel);
-            var requestContent = new StringContent(requestJson, Encoding.UTF8, "application/json");
-
-            var response = await _client.PostAsync("https://api.cloudflare.com/client/v4/zones", requestContent);
-
-            var responseContent = await response.Content.ReadAsStringAsync();
-
-            Console.WriteLine(response.IsSuccessStatusCode);
-            Console.WriteLine(responseContent);
+            }
+            catch (Exception e)
+            {
+                throw new Exception("Failed to create zone, see inner exception for details", e);
+            }
         }
-
-        public async void ZoneDetails()
-        {
-            _client.DefaultRequestHeaders.Add("X-Auth-Email", _email);
-            _client.DefaultRequestHeaders.Add("X-Auth-Key", _apiKey);
-
-            var response = await _client.GetAsync("https://api.cloudflare.com/client/v4/zones/a957cc9ce77392174f61eaf3e9fe5f4c");
-
-            var content = await response.Content.ReadAsStringAsync();
-
-            Console.WriteLine(response.IsSuccessStatusCode);
-            Console.WriteLine(content);
-        }
-
-        public async void DeleteZone()
-        {
-            _client.DefaultRequestHeaders.Add("X-Auth-Email", _email);
-            _client.DefaultRequestHeaders.Add("X-Auth-Key", _apiKey);
-
-            var response = await _client.DeleteAsync("https://api.cloudflare.com/client/v4/zones/a957cc9ce77392174f61eaf3e9fe5f4c");
-
-            var responseContent = await response.Content.ReadAsStringAsync();
-
-            Console.WriteLine(responseContent);
-        }
-
-        #endregion
 
         #region DNS
 
-        public async void DNSRecordsList()
+        public async Task<DNSListOperationResponse> DNSRecordsList(string zoneId)
         {
-            _client.DefaultRequestHeaders.Add("X-Auth-Email", _email);
-            _client.DefaultRequestHeaders.Add("X-Auth-Key", _apiKey);
-
-            var response = await _client.GetAsync("https://api.cloudflare.com/client/v4/zones/a957cc9ce77392174f61eaf3e9fe5f4c/dns_records");
-            var responseContent = await response.Content.ReadAsStringAsync();
-
-            Console.WriteLine(responseContent);
-        }
-
-        public async void CreateDNSRecord()
-        {
-            _client.DefaultRequestHeaders.Add("X-Auth-Email", _email);
-            _client.DefaultRequestHeaders.Add("X-Auth-Key", _apiKey);
-
-            var dnsRecord = new DNSRecrodObjectModel
+            try
             {
-                type = "A",
-                name = "sportingbit.com",
-                content = "127.0.0.3",
-                proxied = true
-            };
+                using (var client = new HttpClient())
+                {
+                    client.DefaultRequestHeaders.Add("X-Auth-Email", _email);
+                    client.DefaultRequestHeaders.Add("X-Auth-Key", _apiKey);
 
-            var serializedRecord = JsonConvert.SerializeObject(dnsRecord);
-            var requestContent = new StringContent(serializedRecord, Encoding.UTF8, "application/json");
+                    var response = await client.GetAsync($"https://api.cloudflare.com/client/v4/zones/{zoneId}/dns_records");
+                    var responseContent = await response.Content.ReadAsStringAsync();
 
-            var response = await _client.PostAsync("https://api.cloudflare.com/client/v4/zones/a957cc9ce77392174f61eaf3e9fe5f4c/dns_records", requestContent);
-            var responseContent = await response.Content.ReadAsStringAsync();
-
-            Console.WriteLine(responseContent);
+                    return JsonConvert.DeserializeObject<DNSListOperationResponse>(responseContent);
+                }
+            }
+            catch (Exception e)
+            {
+                throw new Exception("Failed to query DNS records, see inner exception for details", e);
+            }
         }
 
-        public async void DeleteDNSRecord()
+        public async Task<DNSOperationResponse> CreateDNSRecord(string domainId, DNSRecordObjectModel dnsRecord)
         {
-            _client.DefaultRequestHeaders.Add("X-Auth-Email", _email);
-            _client.DefaultRequestHeaders.Add("X-Auth-Key", _apiKey);
+            try
+            {
+                using (var client = new HttpClient())
+                {
+                    client.DefaultRequestHeaders.Add("X-Auth-Email", _email);
+                    client.DefaultRequestHeaders.Add("X-Auth-Key", _apiKey);
 
-            var response = await _client.DeleteAsync("https://api.cloudflare.com/client/v4/zones/a957cc9ce77392174f61eaf3e9fe5f4c/dns_records/557827629bca1e8a2ccfc490d4c60436");
-            var responseContent = await response.Content.ReadAsStringAsync();
+                    var serializedRecord = JsonConvert.SerializeObject(dnsRecord);
+                    var requestContent = new StringContent(serializedRecord, Encoding.UTF8, "application/json");
 
-            Console.WriteLine(responseContent);
+                    var response = await _client.PostAsync($"https://api.cloudflare.com/client/v4/zones/{domainId}/dns_records", requestContent);
+                    var responseContent = await response.Content.ReadAsStringAsync();
+
+                    return JsonConvert.DeserializeObject<DNSOperationResponse>(responseContent);
+                }
+            }
+            catch (Exception e)
+            {
+                throw new Exception("Failed to create DNS record, see inner exception for details", e);
+            }
+        }
+
+        public async Task<ResultIdOperationResponse> DeleteDNSRecord(string domainId, string dnsId)
+        {
+            try
+            {
+                using (var client = new HttpClient())
+                {
+                    client.DefaultRequestHeaders.Add("X-Auth-Email", _email);
+                    client.DefaultRequestHeaders.Add("X-Auth-Key", _apiKey);
+
+                    var response = await _client.DeleteAsync($"https://api.cloudflare.com/client/v4/zones/{domainId}/dns_records/{dnsId}");
+                    var responseContent = await response.Content.ReadAsStringAsync();
+
+                    return JsonConvert.DeserializeObject<ResultIdOperationResponse>(responseContent);
+                }
+            }
+            catch (Exception e)
+            {
+                throw new Exception($"Failed to delete DNS record, see inner exception for details", e);
+            }
         }
 
         #endregion
