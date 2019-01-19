@@ -6,8 +6,15 @@
 
         public bool Success { get; set; }
 
-        public string[] Errors { get; set; }
+        public Error[] Errors { get; set; }
 
         public string[] Messages { get; set; }
+
+        public class Error
+        {
+            public string Code { get; set; }
+
+            public string Message { get; set; }
+        }
     }
 }

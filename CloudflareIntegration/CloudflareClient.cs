@@ -117,72 +117,73 @@ namespace CloudflareIntegration
 
         #endregion
 
-        public async void ListSubscription()
+        public async Task<SubscriptionOperationResponse> SubscriptionDetails(string zoneId)
         {
-            _client.DefaultRequestHeaders.Add("X-Auth-Email", _email);
-            _client.DefaultRequestHeaders.Add("X-Auth-Key", _apiKey);
-
-            var response = await _client.GetAsync("https://api.cloudflare.com/client/v4/accounts/a1674829d9aacba53c9a317a6f19d225/subscriptions");
-            var responseContent = await response.Content.ReadAsStringAsync();
-
-            Console.WriteLine(responseContent);
-        }
-
-        public async void CreateSubscription()
-        {
-            _client.DefaultRequestHeaders.Add("X-Auth-Email", _email);
-            _client.DefaultRequestHeaders.Add("X-Auth-Key", _apiKey);
-
-            var createSubscriptionRequest = new CreateSubscriptionRequestModel
+            try
             {
-                app = new CreateSubscriptionRequestModel.App
+                using (var client = new HttpClient())
                 {
-                    install_id = null
-                },
-                id = Guid.NewGuid().ToString(),
-                state = "Trial",
-                price = 20,
-                currency = "USD",
-                component_values = Enumerable.Empty<CreateSubscriptionRequestModel.ComponentValue>(),
-                zone = new CreateSubscriptionRequestModel.Zone
-                {
-                    id = "a957cc9ce77392174f61eaf3e9fe5f4c",
-                    name = "sportingbit.com"
-                },
-                frequency = "monthly",
-                rate_plan = new CreateSubscriptionRequestModel.RatePlan
-                {
-                    id = "free",
-                    public_name = "Business Plan",
-                    currency = "USD",
-                    scope = "zone",
-                    externally_managed = false
-                },
-                current_period_end = DateTime.Now,
-                current_period_start = DateTime.Now.AddYears(1)
-            };
+                    client.DefaultRequestHeaders.Add("X-Auth-Email", _email);
+                    client.DefaultRequestHeaders.Add("X-Auth-Key", _apiKey);
 
-            var requestJson = JsonConvert.SerializeObject(createSubscriptionRequest);
-            var requestContent = new StringContent(requestJson, Encoding.UTF8, "application/json");
+                    var response = await client.GetAsync($"https://api.cloudflare.com/client/v4/zones/{zoneId}/subscription");
+                    var responseContent = await response.Content.ReadAsStringAsync();
 
-            var response = await _client.PostAsync("https://api.cloudflare.com/client/v4/accounts/a1674829d9aacba53c9a317a6f19d225/subscriptions", requestContent);
-            var responseContent = await response.Content.ReadAsStringAsync();
-
-            Console.WriteLine(response.IsSuccessStatusCode);
-            Console.WriteLine(responseContent);
+                    return JsonConvert.DeserializeObject<SubscriptionOperationResponse>(responseContent);
+                }
+            }
+            catch (Exception e)
+            {
+                throw new Exception("Failed to query subscription, see inner exception for details", e);
+            }
         }
 
-        public async void FlexibleSSL()
+        public async Task<SubscriptionOperationResponse> CreateSubscription(string zoneId, SubscriptionModel subscription)
         {
-            _client.DefaultRequestHeaders.Add("X-Auth-Email", _email);
-            _client.DefaultRequestHeaders.Add("X-Auth-Key", _apiKey);
+            try
+            {
+                using (var client = new HttpClient())
+                {
+                    client.DefaultRequestHeaders.Add("X-Auth-Email", _email);
+                    client.DefaultRequestHeaders.Add("X-Auth-Key", _apiKey);
 
-            var requestContent = new StringContent("{\"value\": \"flexible\"}", Encoding.UTF8, "application/json");
-            var response = await _client.PatchAsync("https://api.cloudflare.com/client/v4/zones/a957cc9ce77392174f61eaf3e9fe5f4c/settings/ssl", requestContent);
+                    var requestJson = JsonConvert.SerializeObject(subscription);
+                    var requestContent = new StringContent(requestJson, Encoding.UTF8, "application/json");
 
-            var responseContent = await response.Content.ReadAsStringAsync();
+                    var response = await client.PostAsync($"https://api.cloudflare.com/client/v4/zones/{zoneId}/subscription", requestContent);
+                    var responseContent = await response.Content.ReadAsStringAsync();
 
-            Console.WriteLine(responseContent);
+                    return JsonConvert.DeserializeObject<SubscriptionOperationResponse>(responseContent);
+                }
+            }
+            catch (Exception e)
+            {
+                throw new Exception("Failed to create subscription, see inner exception for details", e);
+            }
+        }
+
+        public async Task<ChangeSSLSettingOperationResponse> ChangeSSLSetting(string zoneId, SSLSettingModel sslSetting)
+        {
+            try
+            {
+                using (var client = new HttpClient())
+                {
+                    client.DefaultRequestHeaders.Add("X-Auth-Email", _email);
+                    client.DefaultRequestHeaders.Add("X-Auth-Key", _apiKey);
+
+                    var requestJson = JsonConvert.SerializeObject(sslSetting);
+                    var requestContent = new StringContent(requestJson, Encoding.UTF8, "application/json");
+
+                    var response = await client.PatchAsync($"https://api.cloudflare.com/client/v4/zones/{zoneId}/settings/ssl", requestContent);
+                    var responseContent = await response.Content.ReadAsStringAsync();
+
+                    return JsonConvert.DeserializeObject<ChangeSSLSettingOperationResponse>(responseContent);
+                }
+            }
+            catch (Exception e)
+            {
+                throw new Exception("Failed to switch ssl to flexible, see inner exception for details", e);
+            }
         }
 
         public async void OrderCertificate()

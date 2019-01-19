@@ -20,7 +20,7 @@ namespace CloudflareIntegration.Models
 
         public DateTime modified_on { get; set; }
 
-        public DateTime activated_on { get; set; }
+        public DateTime? activated_on { get; set; }
 
         public Owner owner { get; set; }
 

@@ -3,7 +3,7 @@ using System.Collections.Generic;
 
 namespace CloudflareIntegration.Models
 {
-    public class CreateSubscriptionRequestModel
+    public class SubscriptionModel
     {
         public App app { get; set; }
 
