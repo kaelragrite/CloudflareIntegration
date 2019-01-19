@@ -18,17 +18,17 @@ namespace CloudflareIntegration
             var dnsList = _client.DNSRecordsList(createZoneResponse.Result.id).Result;
             if (!dnsList.Success) return (false, $"Failed to query DNS records: {dnsList.Errors.ToString()}");
 
-            foreach (var dns in dnsList.Result.Where(x => x.type == "A"))
+            foreach (var dns in dnsList.Result.Where(x => x.type == DNSRecordModel.DNSRecordType.A))
             {
                 var deleteResult = _client.DeleteDNSRecord(createZoneResponse.Result.id, dns.id).Result;
                 if (!deleteResult.Success) return (false, $"Failed to delete DNS records: {deleteResult.Errors.ToString()}");
             }
 
-            if (dnsList.Result.All(x => x.type != "CNAME"))
+            if (dnsList.Result.All(x => x.type != DNSRecordModel.DNSRecordType.CNAME))
             {
                 var createDNSResult = _client.CreateDNSRecord(createZoneResponse.Result.id, new DNSRecordModel
                 {
-                    type = "CNAME",
+                    type = DNSRecordModel.DNSRecordType.CNAME,
                     name = "www",
                     content = domain.Name,
                     proxied = true
@@ -41,7 +41,7 @@ namespace CloudflareIntegration
             {
                 var createDNSResult = _client.CreateDNSRecord(createZoneResponse.Result.id, new DNSRecordModel
                 {
-                    type = dns.Type,
+                    type = DNSRecordModel.DNSRecordType.A,
                     name = domain.Name,
                     content = dns.Content,
                     proxied = dns.Proxied

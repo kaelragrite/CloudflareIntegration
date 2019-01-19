@@ -1,6 +1,6 @@
 ﻿namespace CloudflareIntegration.Models.Responses
 {
-    public class ResultIdOperationResponse : CloudflareResponseBase<ResultIdOperationResponse.ResultId>
+    public class ResultIdResponse : CloudflareResponseBase<ResultIdResponse.ResultId>
     {
         public class ResultId
         {

@@ -1,4 +1,6 @@
-﻿using System;
+﻿using Newtonsoft.Json;
+using Newtonsoft.Json.Converters;
+using System;
 
 namespace CloudflareIntegration.Models
 {
@@ -6,7 +8,8 @@ namespace CloudflareIntegration.Models
     {
         public string id { get; set; }
 
-        public string type { get; set; }
+        [JsonConverter(typeof(StringEnumConverter))]
+        public DNSRecordType type { get; set; }
 
         public string name { get; set; }
 
@@ -35,6 +38,27 @@ namespace CloudflareIntegration.Models
         public class Meta
         {
             public bool auto_added { get; set; }
+        }
+
+        public enum DNSRecordType
+        {
+            A,
+            AAAA,
+            CNAME,
+            TXT,
+            SRV,
+            LOC,
+            MX,
+            NS,
+            SPF,
+            CERT,
+            DNSKEY,
+            DS,
+            NAPTR,
+            SMIMEA,
+            SSHFP,
+            TLSA,
+            URI
         }
     }
 }

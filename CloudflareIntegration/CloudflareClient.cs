@@ -23,7 +23,7 @@ namespace CloudflareIntegration
             _apiKey = "0cd2b200ce8b196f970d36229798fefeb274f";
         }
 
-        public async Task<ZoneOperationResponse> CreateZone(ZoneModel zone)
+        public async Task<ZoneResponse> CreateZone(ZoneModel zone)
         {
             try
             {
@@ -38,7 +38,7 @@ namespace CloudflareIntegration
                     var response = await client.PostAsync("https://api.cloudflare.com/client/v4/zones", requestContent);
                     var responseContent = await response.Content.ReadAsStringAsync();
 
-                    return JsonConvert.DeserializeObject<ZoneOperationResponse>(responseContent);
+                    return JsonConvert.DeserializeObject<ZoneResponse>(responseContent);
                 }
             }
             catch (Exception e)
@@ -49,7 +49,7 @@ namespace CloudflareIntegration
 
         #region DNS
 
-        public async Task<DNSListOperationResponse> DNSRecordsList(string zoneId)
+        public async Task<DNSListResponse> DNSRecordsList(string zoneId)
         {
             try
             {
@@ -61,7 +61,7 @@ namespace CloudflareIntegration
                     var response = await client.GetAsync($"https://api.cloudflare.com/client/v4/zones/{zoneId}/dns_records");
                     var responseContent = await response.Content.ReadAsStringAsync();
 
-                    return JsonConvert.DeserializeObject<DNSListOperationResponse>(responseContent);
+                    return JsonConvert.DeserializeObject<DNSListResponse>(responseContent);
                 }
             }
             catch (Exception e)
@@ -70,7 +70,7 @@ namespace CloudflareIntegration
             }
         }
 
-        public async Task<DNSOperationResponse> CreateDNSRecord(string domainId, DNSRecordModel dnsRecord)
+        public async Task<DNSResponse> CreateDNSRecord(string domainId, DNSRecordModel dnsRecord)
         {
             try
             {
@@ -85,7 +85,7 @@ namespace CloudflareIntegration
                     var response = await _client.PostAsync($"https://api.cloudflare.com/client/v4/zones/{domainId}/dns_records", requestContent);
                     var responseContent = await response.Content.ReadAsStringAsync();
 
-                    return JsonConvert.DeserializeObject<DNSOperationResponse>(responseContent);
+                    return JsonConvert.DeserializeObject<DNSResponse>(responseContent);
                 }
             }
             catch (Exception e)
@@ -94,7 +94,7 @@ namespace CloudflareIntegration
             }
         }
 
-        public async Task<ResultIdOperationResponse> DeleteDNSRecord(string domainId, string dnsId)
+        public async Task<ResultIdResponse> DeleteDNSRecord(string domainId, string dnsId)
         {
             try
             {
@@ -106,7 +106,7 @@ namespace CloudflareIntegration
                     var response = await _client.DeleteAsync($"https://api.cloudflare.com/client/v4/zones/{domainId}/dns_records/{dnsId}");
                     var responseContent = await response.Content.ReadAsStringAsync();
 
-                    return JsonConvert.DeserializeObject<ResultIdOperationResponse>(responseContent);
+                    return JsonConvert.DeserializeObject<ResultIdResponse>(responseContent);
                 }
             }
             catch (Exception e)
@@ -117,7 +117,7 @@ namespace CloudflareIntegration
 
         #endregion
 
-        public async Task<SubscriptionOperationResponse> SubscriptionDetails(string zoneId)
+        public async Task<SubscriptionResponse> SubscriptionDetails(string zoneId)
         {
             try
             {
@@ -129,7 +129,7 @@ namespace CloudflareIntegration
                     var response = await client.GetAsync($"https://api.cloudflare.com/client/v4/zones/{zoneId}/subscription");
                     var responseContent = await response.Content.ReadAsStringAsync();
 
-                    return JsonConvert.DeserializeObject<SubscriptionOperationResponse>(responseContent);
+                    return JsonConvert.DeserializeObject<SubscriptionResponse>(responseContent);
                 }
             }
             catch (Exception e)
@@ -138,7 +138,7 @@ namespace CloudflareIntegration
             }
         }
 
-        public async Task<SubscriptionOperationResponse> CreateSubscription(string zoneId, SubscriptionModel subscription)
+        public async Task<SubscriptionResponse> CreateSubscription(string zoneId, SubscriptionModel subscription)
         {
             try
             {
@@ -153,7 +153,7 @@ namespace CloudflareIntegration
                     var response = await client.PostAsync($"https://api.cloudflare.com/client/v4/zones/{zoneId}/subscription", requestContent);
                     var responseContent = await response.Content.ReadAsStringAsync();
 
-                    return JsonConvert.DeserializeObject<SubscriptionOperationResponse>(responseContent);
+                    return JsonConvert.DeserializeObject<SubscriptionResponse>(responseContent);
                 }
             }
             catch (Exception e)
@@ -162,7 +162,7 @@ namespace CloudflareIntegration
             }
         }
 
-        public async Task<ChangeSSLSettingOperationResponse> ChangeSSLSetting(string zoneId, SSLSettingModel sslSetting)
+        public async Task<ChangeSSLSettingResponse> ChangeSSLSetting(string zoneId, SSLSettingModel sslSetting)
         {
             try
             {
@@ -177,7 +177,7 @@ namespace CloudflareIntegration
                     var response = await client.PatchAsync($"https://api.cloudflare.com/client/v4/zones/{zoneId}/settings/ssl", requestContent);
                     var responseContent = await response.Content.ReadAsStringAsync();
 
-                    return JsonConvert.DeserializeObject<ChangeSSLSettingOperationResponse>(responseContent);
+                    return JsonConvert.DeserializeObject<ChangeSSLSettingResponse>(responseContent);
                 }
             }
             catch (Exception e)
