@@ -1,4 +1,4 @@
-﻿namespace CloudflareIntegration.Models
+﻿namespace CloudflareIntegration.Models.Responses
 {
     public class CloudflarePagedResponseBase<T> : CloudflareResponseBase<T> where T : class
     {

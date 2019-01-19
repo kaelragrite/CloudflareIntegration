@@ -7,7 +7,7 @@ namespace CloudflareIntegration
     {
         private readonly CloudflareClient _client;
 
-        // გადაწყობისას დასამატებელია DI
+        // DI
         public CloudflareManager() => _client = new CloudflareClient();
 
         public (bool success, string message) AddDomainWithOperations(DomainModel domain)
@@ -42,7 +42,7 @@ namespace CloudflareIntegration
                 var createDNSResult = _client.CreateDNSRecord(createZoneResponse.Result.id, new DNSRecordModel
                 {
                     type = DNSRecordModel.DNSRecordType.A,
-                    name = domain.Name,
+                    name = dns.Name,
                     content = dns.Content,
                     proxied = dns.Proxied
                 }).Result;
@@ -63,13 +63,29 @@ namespace CloudflareIntegration
             }).Result;
             if (!subscriptionResponse.Success) return (false, $"Failed to create subscription: {subscriptionResponse.Errors.ToString()}");
 
+            var hosts = domain.DNSRecords.Select(x => x.Name).ToList();
+            hosts.Add(domain.Name);
+
+            var certificatePackResponse = _client.OrderCertificatePack(createZoneResponse.Result.id, new CertificatePackModel
+            {
+                type = CertificatePackModel.CertificateType.dedicated,
+                hosts = hosts.ToArray()
+            }).Result;
+            if (!certificatePackResponse.Success) return (false, $"Failed to order certificate pack: {certificatePackResponse.Errors.ToString()}");
+
             var changeSSLSettingResponse = _client.ChangeSSLSetting(createZoneResponse.Result.id, new SSLSettingModel
             {
                 value = SSLSettingModel.SSLSettingValue.flexible
             }).Result;
             if (!changeSSLSettingResponse.Success) return (false, $"Failed to change SSL setting: {changeSSLSettingResponse.Errors.ToString()}");
 
-            return (false, "");
+            var alwaysUseHTTPSSettingResponse = _client.ChangeAlwaysUseHTTPSSetting(createZoneResponse.Result.id, new AlwaysUseHTTPSSetting
+            {
+                value = AlwaysUseHTTPSSetting.AlwaysUseHTTPSSettingValue.on
+            }).Result;
+            if (!alwaysUseHTTPSSettingResponse.Success) return (false, $"Failed to change always use https setting: {alwaysUseHTTPSSettingResponse.Errors.ToString()}");
+
+            return (true, "Operation succeeded");
         }
     }
 }
