@@ -12,7 +12,7 @@ namespace CloudflareIntegration
 
         public (bool success, string message) AddDomainWithOperations(DomainModel domain)
         {
-            var createZoneResponse = _client.CreateZone(new ZoneObjectModel { name = domain.Name }).Result;
+            var createZoneResponse = _client.CreateZone(new ZoneModel { name = domain.Name }).Result;
             if (!createZoneResponse.Success) return (false, $"Failed to create zone: {createZoneResponse.Errors.ToString()}");
 
             var dnsList = _client.DNSRecordsList(createZoneResponse.Result.id).Result;
@@ -26,7 +26,7 @@ namespace CloudflareIntegration
 
             if (dnsList.Result.All(x => x.type != "CNAME"))
             {
-                var createDNSResult = _client.CreateDNSRecord(createZoneResponse.Result.id, new DNSRecordObjectModel
+                var createDNSResult = _client.CreateDNSRecord(createZoneResponse.Result.id, new DNSRecordModel
                 {
                     type = "CNAME",
                     name = "www",
@@ -39,7 +39,7 @@ namespace CloudflareIntegration
 
             foreach (var dns in domain.DNSRecords)
             {
-                var createDNSResult = _client.CreateDNSRecord(createZoneResponse.Result.id, new DNSRecordObjectModel
+                var createDNSResult = _client.CreateDNSRecord(createZoneResponse.Result.id, new DNSRecordModel
                 {
                     type = dns.Type,
                     name = domain.Name,

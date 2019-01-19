@@ -2,7 +2,7 @@
 
 namespace CloudflareIntegration.Models
 {
-    public class ZoneObjectModel
+    public class ZoneModel
     {
         public string id { get; set; }
 

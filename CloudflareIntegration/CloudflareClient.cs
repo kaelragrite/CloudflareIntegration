@@ -23,7 +23,7 @@ namespace CloudflareIntegration
             _apiKey = "0cd2b200ce8b196f970d36229798fefeb274f";
         }
 
-        public async Task<ZoneOperationResponse> CreateZone(ZoneObjectModel zone)
+        public async Task<ZoneOperationResponse> CreateZone(ZoneModel zone)
         {
             try
             {
@@ -70,7 +70,7 @@ namespace CloudflareIntegration
             }
         }
 
-        public async Task<DNSOperationResponse> CreateDNSRecord(string domainId, DNSRecordObjectModel dnsRecord)
+        public async Task<DNSOperationResponse> CreateDNSRecord(string domainId, DNSRecordModel dnsRecord)
         {
             try
             {

@@ -2,5 +2,5 @@
 
 namespace CloudflareIntegration.Models.Responses
 {
-    public class DNSListOperationResponse : CloudflarePagedResponseBase<IEnumerable<DNSRecordObjectModel>> { }
+    public class DNSListOperationResponse : CloudflarePagedResponseBase<IEnumerable<DNSRecordModel>> { }
 }

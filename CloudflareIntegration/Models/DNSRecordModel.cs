@@ -2,7 +2,7 @@
 
 namespace CloudflareIntegration.Models
 {
-    public class DNSRecordObjectModel
+    public class DNSRecordModel
     {
         public string id { get; set; }
 

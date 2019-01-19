@@ -1,4 +1,4 @@
 ﻿namespace CloudflareIntegration.Models.Responses
 {
-    public class DNSOperationResponse : CloudflareResponseBase<DNSRecordObjectModel> { }
+    public class DNSOperationResponse : CloudflareResponseBase<DNSRecordModel> { }
 }
